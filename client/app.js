@@ -315,6 +315,8 @@ function applyScanOverlayState() {
     node.hidden = !state.scan.active || !state.scan.manualReady || state.scan.pdfReady;
   });
   const tutorialVisible = isTutorialActive();
+  const floatingVisible =
+    tutorialVisible && state.scan.tutorialStep >= 0 && state.scan.tutorialStep < TUTORIAL_STEPS.length;
   document.querySelectorAll(".manual-step-index, .manual-step-title").forEach((node) => {
     node.hidden = !tutorialVisible;
   });
@@ -322,10 +324,10 @@ function applyScanOverlayState() {
     node.hidden = !tutorialVisible;
   });
   document.querySelectorAll(".manual-done-video").forEach((node) => {
-    node.hidden = !tutorialVisible;
+    node.hidden = true;
   });
   document.querySelectorAll(".tutorial-floating").forEach((node) => {
-    node.hidden = !tutorialVisible;
+    node.hidden = !floatingVisible;
   });
   if (tutorialVisible) {
     renderTutorialStep();
