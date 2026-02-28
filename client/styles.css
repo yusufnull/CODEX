@@ -593,6 +593,27 @@ video {
   font-size: 1.7rem;
 }
 
+.machine-model-panel {
+  position: absolute;
+  right: 24px;
+  top: 72px;
+  width: min(42vw, 52vh);
+  height: min(60vh, 60vw);
+  max-height: 60vh;
+  border-radius: 24px;
+  border: 1px solid rgba(214, 226, 246, 0.24);
+  background: rgba(18, 24, 35, 0.32);
+  backdrop-filter: blur(6px);
+  overflow: hidden;
+}
+
+.machine-model-panel model-viewer {
+  width: 100%;
+  height: 100%;
+  --poster-color: transparent;
+  background: transparent;
+}
+
 .scan-overlay {
   position: absolute;
   left: 50%;
@@ -757,6 +778,14 @@ video {
   border: 1px solid rgba(214, 226, 246, 0.32);
   background: rgba(240, 242, 247, 0.95);
   object-fit: cover;
+}
+
+.manual-pdf-viewer {
+  width: 100%;
+  height: min(54vh, 420px);
+  border: 1px solid rgba(214, 226, 246, 0.32);
+  border-radius: 14px;
+  background: rgba(240, 242, 247, 0.95);
 }
 
 .scan-pill {
@@ -930,6 +959,14 @@ video {
     gap: 10px;
   }
 
+  .machine-model-panel {
+    right: 10px;
+    top: 52px;
+    width: min(46vw, 220px);
+    height: min(60vh, 270px);
+    border-radius: 16px;
+  }
+
   .scan-result-card {
     width: min(320px, 84vw);
     left: 12px;
@@ -976,6 +1013,11 @@ video {
 
   .manual-found-card h3 {
     font-size: 0.86rem;
+  }
+
+  .manual-pdf-viewer {
+    height: min(46vh, 300px);
+    border-radius: 10px;
   }
 
   .scan-pill {

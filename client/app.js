@@ -42,7 +42,9 @@ const state = {
     detected: false,
     progressTimer: null,
     progressPct: 0,
-    manualReady: false
+    manualReady: false,
+    previewTimer: null,
+    pdfReady: false
   }
 };
 
@@ -174,6 +176,12 @@ function applyScanOverlayState() {
   document.querySelectorAll(".manual-found-card").forEach((node) => {
     node.hidden = !state.scan.active || !state.scan.manualReady;
   });
+  document.querySelectorAll(".manual-preview-image").forEach((node) => {
+    node.hidden = !state.scan.active || !state.scan.manualReady || state.scan.pdfReady;
+  });
+  document.querySelectorAll(".manual-pdf-viewer").forEach((node) => {
+    node.hidden = !state.scan.active || !state.scan.manualReady || !state.scan.pdfReady;
+  });
   updateScanProgress();
   updateScanTip();
 }
@@ -202,9 +210,14 @@ function setScanMode(enabled) {
       clearInterval(state.scan.progressTimer);
       state.scan.progressTimer = null;
     }
+    if (state.scan.previewTimer) {
+      clearTimeout(state.scan.previewTimer);
+      state.scan.previewTimer = null;
+    }
     state.scan.detected = false;
     state.scan.progressPct = 0;
     state.scan.manualReady = false;
+    state.scan.pdfReady = false;
     state.scan.tipIndex = 0;
     applyScanOverlayState();
     return;
@@ -213,6 +226,7 @@ function setScanMode(enabled) {
     state.scan.detected = false;
     state.scan.progressPct = 0;
     state.scan.manualReady = false;
+    state.scan.pdfReady = false;
     state.scan.tipIndex = 0;
   }
   if (!state.scan.tipTimer) {
@@ -243,6 +257,15 @@ function setScanMode(enabled) {
             state.scan.manualReady = true;
             clearInterval(state.scan.progressTimer);
             state.scan.progressTimer = null;
+            state.scan.pdfReady = false;
+            if (state.scan.previewTimer) {
+              clearTimeout(state.scan.previewTimer);
+            }
+            state.scan.previewTimer = setTimeout(() => {
+              state.scan.pdfReady = true;
+              state.scan.previewTimer = null;
+              applyScanOverlayState();
+            }, 1000);
             applyScanOverlayState();
           }
         }, 260);

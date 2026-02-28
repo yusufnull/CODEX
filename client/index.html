@@ -7,6 +7,7 @@
     <title>AR Demo - Pairing + Realtime</title>
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="stylesheet" href="/styles.css" />
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -189,8 +190,20 @@
             <p>Voice ready. Say "scan" to activate scanner.</p>
             <p class="barista-version">v0.1.0 Open Source</p>
           </section>
+          <section class="machine-model-panel">
+            <model-viewer
+              src="/A_Coffee_Machine.glb"
+              alt="WPM Primus coffee machine model"
+              camera-controls
+              auto-rotate
+              interaction-prompt="none"
+              loading="eager"
+              reveal="auto"
+              shadow-intensity="0.5"
+            ></model-viewer>
+          </section>
           <section class="scan-overlay" hidden>
-            <div class="scan-pill">🔎 Scanning environment...</div>
+            <div class="scan-pill">Scanning environment...</div>
             <div class="scan-frame">
               <span class="corner tl"></span>
               <span class="corner tr"></span>
@@ -198,7 +211,7 @@
               <span class="corner br"></span>
               <div class="scan-sweep"></div>
             </div>
-            <p class="scan-tip-text">Slowly rotate 360° so the camera can map the machine.</p>
+            <p class="scan-tip-text">Slowly rotate 360 deg so the camera can map the machine.</p>
           </section>
           <section class="scan-result-card" hidden>
             <h3>IDENTIFIED</h3>
@@ -219,7 +232,13 @@
           <section class="manual-found-card" hidden>
             <h3>MANUAL FOUND</h3>
             <div class="result-rule"></div>
-            <img src="/manual-wpm-primus.png" alt="WPM Primus instruction manual thumbnail" />
+            <img class="manual-preview-image" src="/manual-wpm-primus.png" alt="WPM Primus instruction manual thumbnail" />
+            <iframe
+              class="manual-pdf-viewer"
+              src="/manual-wpm-primus%20instruction.pdf#toolbar=0&navpanes=0&scrollbar=0"
+              title="WPM Primus instruction manual"
+              hidden
+            ></iframe>
           </section>
         </div>
         <div id="stereoUiOverlay" class="stereo-ui-overlay" hidden>
@@ -233,3 +252,8 @@
     <script src="/app.js" defer></script>
   </body>
 </html>
+
+
+
+
+
