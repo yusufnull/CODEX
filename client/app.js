@@ -315,6 +315,9 @@ function applyScanOverlayState() {
     node.hidden = !state.scan.active || !state.scan.manualReady || state.scan.pdfReady;
   });
   const tutorialVisible = isTutorialActive();
+  document.querySelectorAll(".manual-step-index, .manual-step-title").forEach((node) => {
+    node.hidden = !tutorialVisible;
+  });
   document.querySelectorAll(".manual-pdf-canvas").forEach((node) => {
     node.hidden = !tutorialVisible;
   });
@@ -1077,15 +1080,15 @@ function handleRealtimeTranscriptEvent(event) {
     const itemId = event.item_id || "unknown";
     const transcript = String(event.transcript || "");
     state.voice.deltaByItem.delete(itemId);
+    setVoicePartial("-");
+    setLiveTranscript(normalizeTranscript(transcript) || transcript || "-");
+    console.log("[voice-completed]", transcript);
+    maybeTriggerCommand(transcript, itemId);
     for (const key of state.voice.triggeredKeys) {
       if (key.startsWith(`${itemId}:`)) {
         state.voice.triggeredKeys.delete(key);
       }
     }
-    setVoicePartial("-");
-    setLiveTranscript(normalizeTranscript(transcript) || transcript || "-");
-    console.log("[voice-completed]", transcript);
-    maybeTriggerCommand(transcript, itemId);
     setListeningStatus("Listening...");
     return;
   }
