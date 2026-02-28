@@ -167,9 +167,14 @@ function buildStereoUiMirrors() {
 }
 
 function ensureStereoBuffers() {
-  // Render at higher internal resolution to reduce blur while keeping compute bounded.
-  const targetWorkWidth = 480;
-  const targetWorkHeight = 270;
+  // Adaptive HD-like resolution from current display size with a safe upper cap.
+  const perEyeDisplayW = Math.max(2, Math.floor((els.stereoCanvas?.width || 2) / 2));
+  const displayH = Math.max(2, Math.floor(els.stereoCanvas?.height || 2));
+  const maxPixelsPerEye = 1280 * 720;
+  const currentPixels = perEyeDisplayW * displayH;
+  const scale = currentPixels > maxPixelsPerEye ? Math.sqrt(maxPixelsPerEye / currentPixels) : 1;
+  const targetWorkWidth = Math.max(320, Math.floor(perEyeDisplayW * scale));
+  const targetWorkHeight = Math.max(180, Math.floor(displayH * scale));
   const targetOutWidth = targetWorkWidth * 2;
   const targetOutHeight = targetWorkHeight;
 
@@ -269,7 +274,8 @@ function renderStereoFrame() {
   if (targetCtx) {
     const displayW = els.stereoCanvas.width || 2;
     const displayH = els.stereoCanvas.height || 2;
-    targetCtx.imageSmoothingEnabled = false;
+    targetCtx.imageSmoothingEnabled = true;
+    targetCtx.imageSmoothingQuality = "high";
     targetCtx.clearRect(0, 0, displayW, displayH);
     targetCtx.drawImage(state.stereo.outCanvas, 0, 0, displayW, displayH);
   }
@@ -282,8 +288,9 @@ function resizeStereoCanvas() {
     return;
   }
   const bounds = els.appFullscreen.getBoundingClientRect();
-  const nextW = Math.max(2, Math.floor(bounds.width));
-  const nextH = Math.max(2, Math.floor(bounds.height));
+  const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 3));
+  const nextW = Math.max(2, Math.floor(bounds.width * dpr));
+  const nextH = Math.max(2, Math.floor(bounds.height * dpr));
   if (els.stereoCanvas.width !== nextW) {
     els.stereoCanvas.width = nextW;
   }
