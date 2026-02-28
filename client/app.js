@@ -37,7 +37,12 @@ const state = {
   scan: {
     active: false,
     tipIndex: 0,
-    tipTimer: null
+    tipTimer: null,
+    detectTimer: null,
+    detected: false,
+    progressTimer: null,
+    progressPct: 0,
+    manualReady: false
   }
 };
 
@@ -157,10 +162,27 @@ function updateScanTip() {
 }
 
 function applyScanOverlayState() {
-  document.querySelectorAll(".scan-overlay").forEach((node) => {
-    node.hidden = !state.scan.active;
+  document.querySelectorAll(".barista-ui").forEach((node) => {
+    node.classList.toggle("scan-active", state.scan.active);
   });
+  document.querySelectorAll(".scan-overlay").forEach((node) => {
+    node.hidden = !state.scan.active || state.scan.detected;
+  });
+  document.querySelectorAll(".scan-result-card").forEach((node) => {
+    node.hidden = !state.scan.active || !state.scan.detected || state.scan.manualReady;
+  });
+  document.querySelectorAll(".manual-found-card").forEach((node) => {
+    node.hidden = !state.scan.active || !state.scan.manualReady;
+  });
+  updateScanProgress();
   updateScanTip();
+}
+
+function updateScanProgress() {
+  const pct = Math.max(0, Math.min(100, Math.round(state.scan.progressPct)));
+  document.querySelectorAll(".result-progress span").forEach((node) => {
+    node.style.width = `${pct}%`;
+  });
 }
 
 function setScanMode(enabled) {
@@ -172,11 +194,25 @@ function setScanMode(enabled) {
       clearInterval(state.scan.tipTimer);
       state.scan.tipTimer = null;
     }
+    if (state.scan.detectTimer) {
+      clearTimeout(state.scan.detectTimer);
+      state.scan.detectTimer = null;
+    }
+    if (state.scan.progressTimer) {
+      clearInterval(state.scan.progressTimer);
+      state.scan.progressTimer = null;
+    }
+    state.scan.detected = false;
+    state.scan.progressPct = 0;
+    state.scan.manualReady = false;
     state.scan.tipIndex = 0;
     applyScanOverlayState();
     return;
   }
   if (changed) {
+    state.scan.detected = false;
+    state.scan.progressPct = 0;
+    state.scan.manualReady = false;
     state.scan.tipIndex = 0;
   }
   if (!state.scan.tipTimer) {
@@ -184,6 +220,35 @@ function setScanMode(enabled) {
       state.scan.tipIndex = (state.scan.tipIndex + 1) % SCAN_TIPS.length;
       updateScanTip();
     }, 4200);
+  }
+  if (!state.scan.detectTimer) {
+    state.scan.detectTimer = setTimeout(() => {
+      state.scan.detected = true;
+      state.scan.detectTimer = null;
+      if (state.scan.tipTimer) {
+        clearInterval(state.scan.tipTimer);
+        state.scan.tipTimer = null;
+      }
+      if (!state.scan.progressTimer) {
+        state.scan.progressTimer = setInterval(() => {
+          if (!state.scan.active || !state.scan.detected) {
+            clearInterval(state.scan.progressTimer);
+            state.scan.progressTimer = null;
+            return;
+          }
+          const step = Math.random() * 11 + 2;
+          state.scan.progressPct = Math.min(100, state.scan.progressPct + step);
+          updateScanProgress();
+          if (state.scan.progressPct >= 100) {
+            state.scan.manualReady = true;
+            clearInterval(state.scan.progressTimer);
+            state.scan.progressTimer = null;
+            applyScanOverlayState();
+          }
+        }, 260);
+      }
+      applyScanOverlayState();
+    }, 10000);
   }
   applyScanOverlayState();
 }
@@ -434,7 +499,7 @@ function resolveVoiceCommand(rawText) {
   if (normalized.includes("67") || normalized.includes("sixty seven")) {
     return "67";
   }
-  if (normalized.includes("scan") || normalized.includes("start scanner")) {
+  if (normalized === "scan") {
     return "scan";
   }
   if (normalized.includes("change mode")) {
@@ -1132,6 +1197,8 @@ async function launchApp(appId) {
     els.appFullscreen.hidden = false;
     await openFullscreenLayer(els.appFullscreen);
     try {
+      // Always start in pre-scan state for the Barista flow.
+      setScanMode(false);
       await startBaristaCamera();
       setStereoEnabled(true);
       setTransportInfo("Barista Panas opened with back camera.");
@@ -1238,6 +1305,7 @@ if (els.stereoDepthRange) {
   els.stereoDepthRange.value = String(state.stereo.depthStrength);
 }
 updateStereoControls();
+setScanMode(false);
 if (els.voiceDebugLog) {
   els.voiceDebugLog.textContent = "No voice events logged yet.";
 }

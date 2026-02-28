@@ -597,12 +597,166 @@ video {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: min(520px, 72vw);
+  width: min(260px, 36vw);
   transform: translate(-50%, -50%);
   display: grid;
   justify-items: center;
   gap: 16px;
   z-index: 4;
+}
+
+.scan-overlay[hidden] {
+  display: none !important;
+}
+
+.scan-result-card {
+  position: absolute;
+  left: 26px;
+  top: 72px;
+  bottom: 36px;
+  width: min(330px, 31vw);
+  border-radius: 28px;
+  border: 1px solid rgba(218, 230, 251, 0.24);
+  background: linear-gradient(180deg, rgba(27, 33, 47, 0.6), rgba(24, 28, 40, 0.24));
+  backdrop-filter: blur(8px);
+  padding: 22px 22px;
+  color: rgba(226, 235, 248, 0.95);
+  z-index: 5;
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  text-align: left;
+}
+
+.scan-result-card[hidden] {
+  display: none !important;
+}
+
+.scan-result-card h3 {
+  margin: 0;
+  font-size: clamp(1rem, 1vw, 1.2rem);
+  letter-spacing: 0.12em;
+  color: rgba(101, 166, 255, 0.95);
+  font-weight: 500;
+}
+
+.scan-result-card .result-rule {
+  height: 1px;
+  background: rgba(217, 229, 247, 0.2);
+}
+
+.scan-result-card .machine-name {
+  margin: 2px 0 0;
+  font-size: clamp(1rem, 1.1vw, 1.35rem);
+  font-weight: 700;
+  line-height: 1.35;
+  color: rgba(242, 246, 252, 0.98);
+  text-transform: capitalize;
+}
+
+.scan-result-card .machine-subtitle {
+  margin: 0;
+  font-size: clamp(1rem, 1.1vw, 1.35rem);
+  color: rgba(214, 226, 245, 0.92);
+  text-transform: lowercase;
+}
+
+.scan-result-card .status-line {
+  margin: 0;
+  font-size: clamp(1rem, 1.1vw, 1.35rem);
+  color: rgba(220, 230, 246, 0.88);
+  text-transform: lowercase;
+}
+
+.skeleton-line {
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(232, 238, 247, 0.08) 0%,
+    rgba(232, 238, 247, 0.2) 38%,
+    rgba(244, 248, 255, 0.38) 50%,
+    rgba(232, 238, 247, 0.2) 62%,
+    rgba(232, 238, 247, 0.08) 100%
+  );
+  background-size: 220% 100%;
+  animation: skeleton-shimmer 1400ms linear infinite;
+}
+
+.skeleton-line.wide {
+  width: 92%;
+}
+
+.skeleton-line.medium {
+  width: 82%;
+}
+
+.skeleton-line.narrow {
+  width: 72%;
+}
+
+.scan-result-card .status-desc {
+  margin: 0;
+  font-size: clamp(1rem, 1.1vw, 1.35rem);
+  line-height: 1.42;
+  color: rgba(211, 223, 242, 0.84);
+}
+
+.scan-result-card .result-progress {
+  margin-top: auto;
+  width: 100%;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(200, 214, 238, 0.2);
+  overflow: hidden;
+}
+
+.scan-result-card .result-progress span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, rgba(97, 160, 255, 0.9), rgba(139, 186, 255, 0.9));
+  transition: width 220ms ease-out;
+}
+
+.manual-found-card {
+  position: absolute;
+  left: 26px;
+  top: 72px;
+  bottom: 36px;
+  width: min(330px, 31vw);
+  border-radius: 28px;
+  border: 1px solid rgba(218, 230, 251, 0.24);
+  background: linear-gradient(180deg, rgba(27, 33, 47, 0.6), rgba(24, 28, 40, 0.24));
+  backdrop-filter: blur(8px);
+  padding: 22px 22px;
+  color: rgba(226, 235, 248, 0.95);
+  z-index: 5;
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  text-align: left;
+}
+
+.manual-found-card[hidden] {
+  display: none !important;
+}
+
+.manual-found-card h3 {
+  margin: 0;
+  font-size: clamp(1rem, 1vw, 1.2rem);
+  letter-spacing: 0.12em;
+  color: rgba(101, 166, 255, 0.95);
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.manual-found-card img {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid rgba(214, 226, 246, 0.32);
+  background: rgba(240, 242, 247, 0.95);
+  object-fit: cover;
 }
 
 .scan-pill {
@@ -665,10 +819,10 @@ video {
   left: 0;
   right: 0;
   top: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(89, 164, 255, 0.7), transparent);
-  box-shadow: 0 0 10px rgba(89, 164, 255, 0.6);
-  animation: scan-sweep 2200ms linear infinite;
+  height: 2px;
+  background: rgba(89, 164, 255, 0.9);
+  box-shadow: 0 0 8px rgba(89, 164, 255, 0.55);
+  animation: scan-sweep 950ms linear infinite alternate;
 }
 
 .scan-tip-text {
@@ -682,11 +836,24 @@ video {
 
 @keyframes scan-sweep {
   from {
-    transform: translateY(0%);
+    top: 0;
   }
   to {
-    transform: translateY(1000%);
+    top: calc(100% - 2px);
   }
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+.barista-ui.scan-active .barista-landing-panel {
+  display: none;
 }
 
 .barista-hero {
@@ -759,8 +926,56 @@ video {
   }
 
   .scan-overlay {
-    width: min(380px, 88vw);
+    width: min(190px, 44vw);
     gap: 10px;
+  }
+
+  .scan-result-card {
+    width: min(320px, 84vw);
+    left: 12px;
+    top: 58px;
+    bottom: 16px;
+    padding: 18px 16px;
+    gap: 14px;
+    border-radius: 28px;
+  }
+
+  .scan-result-card h3 {
+    font-size: 0.86rem;
+  }
+
+  .scan-result-card .machine-name {
+    font-size: 0.74rem;
+  }
+
+  .scan-result-card .machine-subtitle {
+    font-size: 0.74rem;
+  }
+
+  .scan-result-card .status-line {
+    font-size: 0.74rem;
+  }
+
+  .scan-result-card .status-desc {
+    font-size: 0.74rem;
+  }
+
+  .skeleton-line {
+    height: 8px;
+  }
+
+  .manual-found-card {
+    width: min(320px, 84vw);
+    left: 12px;
+    top: 58px;
+    bottom: 16px;
+    padding: 18px 16px;
+    gap: 14px;
+    border-radius: 28px;
+  }
+
+  .manual-found-card h3 {
+    font-size: 0.86rem;
   }
 
   .scan-pill {

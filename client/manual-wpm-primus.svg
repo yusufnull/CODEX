@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="698" viewBox="0 0 512 698" role="img" aria-label="WPM Primus manual cover">
+  <rect width="512" height="698" fill="#e8e8e8"/>
+  <text x="22" y="54" fill="#202024" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="700">WPM</text>
+
+  <!-- Machine body -->
+  <rect x="160" y="150" width="260" height="300" fill="none" stroke="#2f2f32" stroke-width="3"/>
+  <polygon points="160,150 320,70 420,130 260,210" fill="none" stroke="#2f2f32" stroke-width="3"/>
+  <line x1="320" y1="70" x2="420" y2="130" stroke="#2f2f32" stroke-width="3"/>
+  <line x1="260" y1="210" x2="420" y2="130" stroke="#2f2f32" stroke-width="2"/>
+
+  <!-- Group head -->
+  <ellipse cx="150" cy="250" rx="48" ry="28" fill="none" stroke="#2f2f32" stroke-width="3"/>
+  <rect x="98" y="250" width="105" height="58" rx="10" fill="none" stroke="#2f2f32" stroke-width="3"/>
+  <ellipse cx="150" cy="250" rx="35" ry="20" fill="none" stroke="#2f2f32" stroke-width="3"/>
+  <rect x="206" y="260" width="14" height="14" rx="7" fill="none" stroke="#2f2f32" stroke-width="3"/>
+
+  <!-- Steam wand -->
+  <path d="M220 290 C245 315, 212 350, 188 392" fill="none" stroke="#2f2f32" stroke-width="4"/>
+  <rect x="183" y="390" width="10" height="42" transform="rotate(15 188 390)" fill="none" stroke="#2f2f32" stroke-width="3"/>
+
+  <!-- Base and tray -->
+  <polygon points="98,360 266,360 266,472 98,430" fill="none" stroke="#2f2f32" stroke-width="3"/>
+  <polygon points="266,360 455,360 455,472 266,472" fill="none" stroke="#2f2f32" stroke-width="3"/>
+  <rect x="120" y="378" width="130" height="50" fill="none" stroke="#2f2f32" stroke-width="2"/>
+  <g stroke="#2f2f32" stroke-width="1">
+    <line x1="120" y1="382" x2="250" y2="428"/>
+    <line x1="128" y1="380" x2="258" y2="426"/>
+    <line x1="136" y1="378" x2="266" y2="424"/>
+    <line x1="116" y1="390" x2="246" y2="436"/>
+    <line x1="112" y1="398" x2="242" y2="444"/>
+  </g>
+  <ellipse cx="340" cy="438" rx="6" ry="6" fill="none" stroke="#2f2f32" stroke-width="3"/>
+
+  <text x="26" y="606" fill="#202024" font-family="Arial Black, Arial, Helvetica, sans-serif" font-size="58" font-weight="900">PRIMIS</text>
+  <text x="26" y="642" fill="#2e2e32" font-family="Arial, Helvetica, sans-serif" font-size="38">ESPRESSO MACHINE</text>
+  <text x="26" y="678" fill="#2e2e32" font-family="Arial, Helvetica, sans-serif" font-size="38">INSTRUCTION MANUAL</text>
+</svg>
