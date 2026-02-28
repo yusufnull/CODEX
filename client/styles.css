@@ -772,6 +772,22 @@ video {
   text-transform: uppercase;
 }
 
+.manual-step-index {
+  margin: 0;
+  font-size: clamp(0.9rem, 1vw, 1.1rem);
+  letter-spacing: 0.12em;
+  color: rgba(132, 183, 255, 0.95);
+  text-transform: uppercase;
+}
+
+.manual-step-title {
+  margin: 0;
+  font-size: clamp(1rem, 1.1vw, 1.35rem);
+  line-height: 1.35;
+  color: rgba(238, 244, 253, 0.98);
+  font-weight: 700;
+}
+
 .manual-found-card img {
   width: 100%;
   border-radius: 14px;
@@ -780,12 +796,48 @@ video {
   object-fit: cover;
 }
 
-.manual-pdf-viewer {
+.manual-pdf-canvas {
   width: 100%;
-  height: min(54vh, 420px);
+  height: auto;
   border: 1px solid rgba(214, 226, 246, 0.32);
   border-radius: 14px;
   background: rgba(240, 242, 247, 0.95);
+  display: block;
+}
+
+.manual-done-video {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid rgba(214, 226, 246, 0.32);
+  background: rgba(4, 8, 14, 0.9);
+  display: block;
+}
+
+.tutorial-floating {
+  position: absolute;
+  right: 26px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(360px, 32vw);
+  display: grid;
+  gap: 10px;
+  z-index: 5;
+  text-align: left;
+  color: rgba(233, 241, 252, 0.97);
+  text-shadow: 0 1px 14px rgba(2, 7, 14, 0.7);
+}
+
+.tutorial-floating-title {
+  margin: 0;
+  font-size: clamp(1.1rem, 1.4vw, 1.7rem);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.tutorial-floating-subtitle {
+  margin: 0;
+  font-size: clamp(0.95rem, 1.1vw, 1.2rem);
+  color: rgba(207, 222, 245, 0.9);
 }
 
 .scan-pill {
@@ -1015,9 +1067,39 @@ video {
     font-size: 0.86rem;
   }
 
-  .manual-pdf-viewer {
-    height: min(46vh, 300px);
+  .manual-step-index {
+    font-size: 0.74rem;
+  }
+
+  .manual-step-title {
+    font-size: 0.74rem;
+  }
+
+  .manual-pdf-canvas {
+    max-height: min(46vh, 300px);
     border-radius: 10px;
+  }
+
+  .manual-done-video {
+    max-height: min(46vh, 300px);
+    border-radius: 10px;
+  }
+
+  .tutorial-floating {
+    right: 12px;
+    top: auto;
+    bottom: 22px;
+    transform: none;
+    width: min(300px, 64vw);
+    gap: 6px;
+  }
+
+  .tutorial-floating-title {
+    font-size: 0.84rem;
+  }
+
+  .tutorial-floating-subtitle {
+    font-size: 0.72rem;
   }
 
   .scan-pill {

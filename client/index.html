@@ -8,6 +8,7 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="stylesheet" href="/styles.css" />
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -76,7 +77,7 @@
               </div>
             </div>
           </div>
-          <button class="voice-pill" type="button">Say: Barista, EduAR, 67, scan, left, right, change</button>
+          <button class="voice-pill" type="button">Say: Barista, EduAR, 67, scan, next, back, show 3d, hide 3d, left, right, change</button>
         </div>
       </section>
 
@@ -132,7 +133,7 @@
           <div class="row">
             <button id="voiceToggleBtn">Reconnect voice</button>
           </div>
-          <p class="meta">Commands: left, right, back, exit, click, barista, eduar, 67, scan, change</p>
+          <p class="meta">Commands: left, right, next, back, exit, click, barista, eduar, 67, scan, show 3d, hide 3d, change</p>
           <p class="meta" id="voicePartialText">Partial: -</p>
           <p class="meta" id="voiceCommandText">Last command: none</p>
           <p class="meta" id="voiceEventType">Last event: -</p>
@@ -190,7 +191,7 @@
             <p>Voice ready. Say "scan" to activate scanner.</p>
             <p class="barista-version">v0.1.0 Open Source</p>
           </section>
-          <section class="machine-model-panel">
+          <section class="machine-model-panel" hidden>
             <model-viewer
               src="/A_Coffee_Machine.glb"
               alt="WPM Primus coffee machine model"
@@ -232,13 +233,15 @@
           <section class="manual-found-card" hidden>
             <h3>MANUAL FOUND</h3>
             <div class="result-rule"></div>
+            <p class="manual-step-index">STEP 1 OF 5</p>
+            <p class="manual-step-title">How to make a black coffee</p>
             <img class="manual-preview-image" src="/manual-wpm-primus.png" alt="WPM Primus instruction manual thumbnail" />
-            <iframe
-              class="manual-pdf-viewer"
-              src="/manual-wpm-primus%20instruction.pdf#toolbar=0&navpanes=0&scrollbar=0"
-              title="WPM Primus instruction manual"
-              hidden
-            ></iframe>
+            <canvas class="manual-pdf-canvas" hidden></canvas>
+            <video class="manual-done-video" src="/14099102.gif.mp4" autoplay muted loop playsinline hidden></video>
+          </section>
+          <section class="tutorial-floating" hidden>
+            <p class="tutorial-floating-title">How to make a black coffee</p>
+            <p class="tutorial-floating-subtitle">Say "next" or "back" to navigate steps</p>
           </section>
         </div>
         <div id="stereoUiOverlay" class="stereo-ui-overlay" hidden>

@@ -11,6 +11,7 @@ const state = {
   pagerIndex: 0,
   sliderTouchStartX: 0,
   baristaCameraStream: null,
+  modelVisible: false,
   voice: {
     active: false,
     pc: null,
@@ -44,15 +45,44 @@ const state = {
     progressPct: 0,
     manualReady: false,
     previewTimer: null,
-    pdfReady: false
+    pdfReady: false,
+    pdfDoc: null,
+    tutorialStep: 0,
+    lastRenderedPage: 0
   }
 };
 
-const KNOWN_COMMANDS = new Set(["left", "right", "back", "exit", "click", "barista", "eduar", "67", "scan", "change", "change mode"]);
+const KNOWN_COMMANDS = new Set([
+  "left",
+  "right",
+  "back",
+  "exit",
+  "click",
+  "barista",
+  "eduar",
+  "67",
+  "scan",
+  "next",
+  "show 3d",
+  "show 3 d",
+  "show three d",
+  "hide 3d",
+  "hide 3 d",
+  "hide three d",
+  "change",
+  "change mode"
+]);
 const SCAN_TIPS = [
-  "Slowly rotate 360° so the camera can map the machine.",
-  "Find and face the machine — do a slow 360°.",
-  "Stand ~1–2 meters from the machine for best results."
+  "Slowly rotate 360 deg so the camera can map the machine.",
+  "Find and face the machine - do a slow 360 deg.",
+  "Stand ~1-2 meters from the machine for best results."
+];
+const TUTORIAL_STEPS = [
+  { page: 1, text: "How to make a black coffee", mode: "pdf" },
+  { page: 6, text: "Prepare coffee and insert cups", mode: "pdf" },
+  { page: 7, text: 'Set current Brew mode to "Constant Pressure"', mode: "pdf" },
+  { page: 7, text: "Press the on button", mode: "pdf" },
+  { text: "Manual complete", mode: "done" }
 ];
 
 const els = {
@@ -156,6 +186,111 @@ function syncStereoUiShift() {
   els.stereoUiOverlay.style.setProperty("--ui-shift-px", `${shiftPx}px`);
 }
 
+function applyModelVisibility() {
+  document.querySelectorAll(".machine-model-panel").forEach((node) => {
+    node.hidden = !state.modelVisible;
+  });
+}
+
+function setModelVisible(enabled) {
+  state.modelVisible = Boolean(enabled);
+  applyModelVisibility();
+}
+
+function getTutorialStep() {
+  const index = clamp(state.scan.tutorialStep, 0, TUTORIAL_STEPS.length - 1);
+  return TUTORIAL_STEPS[index];
+}
+
+function isTutorialActive() {
+  return state.scan.active && state.scan.manualReady && state.scan.pdfReady;
+}
+
+function setTutorialStep(nextIndex) {
+  if (!isTutorialActive()) {
+    return;
+  }
+  const clamped = clamp(nextIndex, 0, TUTORIAL_STEPS.length - 1);
+  if (state.scan.tutorialStep === clamped) {
+    return;
+  }
+  state.scan.tutorialStep = clamped;
+  state.scan.lastRenderedPage = 0;
+  applyScanOverlayState();
+}
+
+async function renderManualPdfPage(pageNumber) {
+  if (!state.scan.pdfReady) {
+    return;
+  }
+  const pdfjsLib = window.pdfjsLib;
+  if (!pdfjsLib) {
+    return;
+  }
+  if (!state.scan.pdfDoc) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    state.scan.pdfDoc = await pdfjsLib.getDocument("/manual-wpm-primus%20instruction.pdf").promise;
+  }
+  const safePage = Math.max(1, Math.min(pageNumber, state.scan.pdfDoc.numPages || 1));
+  const page = await state.scan.pdfDoc.getPage(safePage);
+  const canvases = document.querySelectorAll(".manual-pdf-canvas");
+  const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+  for (const canvas of canvases) {
+    const targetWidth = Math.max(220, Math.floor(canvas.clientWidth || 220));
+    const baseViewport = page.getViewport({ scale: 1 });
+    const scale = (targetWidth * dpr) / baseViewport.width;
+    const viewport = page.getViewport({ scale });
+    canvas.width = Math.floor(viewport.width);
+    canvas.height = Math.floor(viewport.height);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      continue;
+    }
+    await page.render({ canvasContext: ctx, viewport }).promise;
+  }
+}
+
+function renderTutorialStep() {
+  if (!isTutorialActive()) {
+    return;
+  }
+  const step = getTutorialStep();
+  const stepLabel = `STEP ${state.scan.tutorialStep + 1} OF ${TUTORIAL_STEPS.length}`;
+  const showPdf = step.mode === "pdf";
+  const showDone = step.mode === "done";
+
+  document.querySelectorAll(".manual-step-index").forEach((node) => {
+    node.textContent = stepLabel;
+  });
+  document.querySelectorAll(".manual-step-title").forEach((node) => {
+    node.textContent = step.text;
+  });
+  document.querySelectorAll(".tutorial-floating-title").forEach((node) => {
+    node.textContent = step.text;
+  });
+  document.querySelectorAll(".manual-pdf-canvas").forEach((node) => {
+    node.hidden = !showPdf;
+  });
+  document.querySelectorAll(".manual-done-video").forEach((node) => {
+    node.hidden = !showDone;
+    if (showDone) {
+      node.currentTime = 0;
+      node.play().catch(() => {
+        // Autoplay can be blocked in some browsers.
+      });
+    } else {
+      node.pause();
+    }
+  });
+
+  if (showPdf && state.scan.lastRenderedPage !== step.page) {
+    state.scan.lastRenderedPage = step.page;
+    renderManualPdfPage(step.page).catch(() => {
+      // Keep UI stable even if PDF renderer is unavailable.
+    });
+  }
+}
+
 function updateScanTip() {
   const text = SCAN_TIPS[state.scan.tipIndex] || SCAN_TIPS[0];
   document.querySelectorAll(".scan-tip-text").forEach((node) => {
@@ -179,9 +314,19 @@ function applyScanOverlayState() {
   document.querySelectorAll(".manual-preview-image").forEach((node) => {
     node.hidden = !state.scan.active || !state.scan.manualReady || state.scan.pdfReady;
   });
-  document.querySelectorAll(".manual-pdf-viewer").forEach((node) => {
-    node.hidden = !state.scan.active || !state.scan.manualReady || !state.scan.pdfReady;
+  const tutorialVisible = isTutorialActive();
+  document.querySelectorAll(".manual-pdf-canvas").forEach((node) => {
+    node.hidden = !tutorialVisible;
   });
+  document.querySelectorAll(".manual-done-video").forEach((node) => {
+    node.hidden = !tutorialVisible;
+  });
+  document.querySelectorAll(".tutorial-floating").forEach((node) => {
+    node.hidden = !tutorialVisible;
+  });
+  if (tutorialVisible) {
+    renderTutorialStep();
+  }
   updateScanProgress();
   updateScanTip();
 }
@@ -219,6 +364,8 @@ function setScanMode(enabled) {
     state.scan.manualReady = false;
     state.scan.pdfReady = false;
     state.scan.tipIndex = 0;
+    state.scan.tutorialStep = 0;
+    state.scan.lastRenderedPage = 0;
     applyScanOverlayState();
     return;
   }
@@ -227,7 +374,10 @@ function setScanMode(enabled) {
     state.scan.progressPct = 0;
     state.scan.manualReady = false;
     state.scan.pdfReady = false;
+    state.scan.pdfDoc = null;
     state.scan.tipIndex = 0;
+    state.scan.tutorialStep = 0;
+    state.scan.lastRenderedPage = 0;
   }
   if (!state.scan.tipTimer) {
     state.scan.tipTimer = setInterval(() => {
@@ -263,6 +413,8 @@ function setScanMode(enabled) {
             }
             state.scan.previewTimer = setTimeout(() => {
               state.scan.pdfReady = true;
+              state.scan.tutorialStep = 0;
+              state.scan.lastRenderedPage = 0;
               state.scan.previewTimer = null;
               applyScanOverlayState();
             }, 1000);
@@ -522,8 +674,17 @@ function resolveVoiceCommand(rawText) {
   if (normalized.includes("67") || normalized.includes("sixty seven")) {
     return "67";
   }
+  if (normalized.includes("show 3d") || normalized.includes("show 3 d") || normalized.includes("show three d")) {
+    return "show 3d";
+  }
+  if (normalized.includes("hide 3d") || normalized.includes("hide 3 d") || normalized.includes("hide three d")) {
+    return "hide 3d";
+  }
   if (normalized === "scan") {
     return "scan";
+  }
+  if (normalized === "next") {
+    return "next";
   }
   if (normalized.includes("change mode")) {
     return "change";
@@ -799,11 +960,21 @@ function triggerVoiceCommand(command) {
     return;
   }
   if (command === "back") {
+    if (isTutorialActive()) {
+      setTutorialStep(state.scan.tutorialStep - 1);
+      return;
+    }
     if (els.controlDock?.open) {
       els.controlDock.open = false;
       return;
     }
     setPagerIndex(state.pagerIndex - 1);
+    return;
+  }
+  if (command === "next") {
+    if (isTutorialActive()) {
+      setTutorialStep(state.scan.tutorialStep + 1);
+    }
     return;
   }
   if (command === "exit") {
@@ -835,6 +1006,14 @@ function triggerVoiceCommand(command) {
   }
   if (command === "67") {
     launchApp("67");
+    return;
+  }
+  if (command === "show 3d") {
+    setModelVisible(true);
+    return;
+  }
+  if (command === "hide 3d") {
+    setModelVisible(false);
     return;
   }
   if (command === "scan") {
@@ -1203,6 +1382,7 @@ function closeBaristaApp() {
     });
   }
   els.appFullscreen.hidden = true;
+  setModelVisible(false);
   setScanMode(false);
   setStereoEnabled(false);
   stopBaristaCamera();
@@ -1221,6 +1401,7 @@ async function launchApp(appId) {
     await openFullscreenLayer(els.appFullscreen);
     try {
       // Always start in pre-scan state for the Barista flow.
+      setModelVisible(false);
       setScanMode(false);
       await startBaristaCamera();
       setStereoEnabled(true);
@@ -1329,6 +1510,7 @@ if (els.stereoDepthRange) {
 }
 updateStereoControls();
 setScanMode(false);
+setModelVisible(false);
 if (els.voiceDebugLog) {
   els.voiceDebugLog.textContent = "No voice events logged yet.";
 }
@@ -1352,6 +1534,7 @@ window.addEventListener("beforeunload", () => {
     state.voice.retryTimer = null;
   }
   setScanMode(false);
+  setModelVisible(false);
   setStereoEnabled(false);
   stopVoiceCommands().catch(() => {
     // Ignore cleanup errors during unload.
