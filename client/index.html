@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="theme-color" content="#0f172a" />
+    <title>AR Demo - Pairing + Realtime</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-a"></div>
+    <div class="ambient ambient-b"></div>
+    <div class="ambient ambient-c"></div>
+
+    <main class="home">
+      <header class="topbar">
+        <span class="brand">BandungPanasOS</span>
+        <span id="clockDisplay" class="clock">12:45</span>
+        <div class="top-icons">
+          <span class="icon">battery</span>
+          <span class="icon">wifi</span>
+          <span class="icon mic">mic</span>
+        </div>
+      </header>
+
+      <section class="status-row">
+        <div class="chip">
+          <span class="chip-icon">bars</span>
+          <span id="listeningStatus">Voice idle</span>
+        </div>
+        <div class="chip">
+          <span class="chip-icon">target</span>
+          <span>Environment mapped</span>
+        </div>
+        <div class="chip transcript-chip">
+          <span class="chip-icon">voice</span>
+          <span id="liveTranscript">No voice transcript yet</span>
+        </div>
+      </section>
+
+      <section class="apps-window">
+        <div class="window-head">
+          <div class="window-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <h1>Apps</h1>
+          <span class="search">search</span>
+        </div>
+        <div class="window-body">
+          <div id="appsSlider" class="apps-slider" aria-live="polite">
+            <div class="apps-track">
+              <div class="app-page">
+                <button id="appLaunchCard" class="app-card" type="button" data-app="barista-panas">
+                  <div class="app-icon">cup</div>
+                  <h2>BaristaPanas</h2>
+                  <p>AR Training</p>
+                </button>
+              </div>
+              <div class="app-page">
+                <button class="app-card app-card-placeholder" type="button" data-app="eduar">
+                  <div class="app-icon">edu</div>
+                  <h2>EduAR</h2>
+                  <p>Placeholder app</p>
+                </button>
+              </div>
+              <div class="app-page">
+                <button class="app-card app-card-placeholder" type="button" data-app="67">
+                  <div class="app-icon">67</div>
+                  <h2>67</h2>
+                  <p>Placeholder app</p>
+                </button>
+              </div>
+            </div>
+          </div>
+          <button class="voice-pill" type="button">Say: Barista, EduAR, 67, left, right, change</button>
+        </div>
+      </section>
+
+      <section class="pager" aria-label="pages">
+        <span class="dot active"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </section>
+    </main>
+
+    <details id="controlDock" class="control-dock">
+      <summary>Demo controls</summary>
+      <div class="dock-grid">
+        <section class="panel">
+          <h3>Session</h3>
+          <div class="row">
+            <button id="createSessionBtn">Create Session</button>
+            <input id="codeInput" type="text" inputmode="numeric" maxlength="6" placeholder="6-digit code" />
+            <button id="joinByCodeBtn">Find by Code</button>
+          </div>
+          <p id="sessionInfo">No active session.</p>
+        </section>
+
+        <section class="panel">
+          <h3>Role + Transport</h3>
+          <div class="row">
+            <label><input type="radio" name="role" value="phone" checked /> Phone</label>
+            <label><input type="radio" name="role" value="tablet" /> Tablet</label>
+          </div>
+          <div class="row">
+            <button id="connectWsBtn">Connect WS</button>
+            <button id="startMediaBtn">Start Camera</button>
+            <button id="startRtcBtn">Start WebRTC</button>
+          </div>
+          <p id="transportInfo">WS disconnected</p>
+        </section>
+
+        <section class="panel">
+          <h3>Events + AI</h3>
+          <div class="row">
+            <button id="sendLandmarksBtn">Send Landmarks</button>
+            <button id="requestInferBtn">Request Inference</button>
+          </div>
+          <textarea id="promptInput" rows="2" placeholder="Prompt for VLM/LLM"></textarea>
+          <div id="overlay">
+            <strong>Latest Directive:</strong>
+            <pre id="directiveOutput">None yet.</pre>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h3>Voice Commands (Realtime)</h3>
+          <div class="row">
+            <button id="voiceToggleBtn">Reconnect voice</button>
+          </div>
+          <p class="meta">Commands: left, right, back, exit, click, barista, eduar, 67, change</p>
+          <p class="meta" id="voicePartialText">Partial: -</p>
+          <p class="meta" id="voiceCommandText">Last command: none</p>
+          <p class="meta" id="voiceEventType">Last event: -</p>
+          <pre id="voiceDebugLog">No voice events logged yet.</pre>
+        </section>
+
+        <section class="panel">
+          <h3>Media Preview</h3>
+          <p class="meta">Tap/click any video to enter fullscreen.</p>
+          <div class="mediaGrid">
+            <div>
+              <h4>Local</h4>
+              <video id="localVideo" autoplay muted playsinline></video>
+            </div>
+            <div>
+              <h4>Remote</h4>
+              <video id="remoteVideo" autoplay playsinline></video>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h3>Stereo AR Filter</h3>
+          <div class="row">
+            <button id="stereoToggleBtn">Enable Stereo AR</button>
+          </div>
+          <div class="row">
+            <label for="stereoSeparationRange">Eye separation</label>
+            <input id="stereoSeparationRange" type="range" min="0" max="32" step="1" value="10" />
+            <span id="stereoSeparationValue">10</span>
+          </div>
+          <div class="row">
+            <label for="stereoDepthRange">Depth strength</label>
+            <input id="stereoDepthRange" type="range" min="0" max="24" step="1" value="8" />
+            <span id="stereoDepthValue">8</span>
+          </div>
+          <p class="meta">Output: full side-by-side (left eye | right eye), suitable for stereo AR glasses display mode.</p>
+        </section>
+      </div>
+    </details>
+
+    <div id="appFullscreen" class="app-fullscreen ui-rotated" hidden>
+      <div class="app-fullscreen-stage">
+        <video id="baristaCameraVideo" autoplay playsinline muted></video>
+        <canvas id="stereoCanvas" class="stereo-canvas" hidden></canvas>
+        <div id="baristaUi" class="barista-ui">
+          <header class="barista-top">
+            <span>BandungPanasOS</span>
+            <strong id="baristaClock" class="barista-clock">12:45</strong>
+            <span class="barista-top-icons">battery wifi mic</span>
+          </header>
+          <section class="barista-landing-panel">
+            <h2>BANDUNGPANAS OS</h2>
+            <p class="barista-strong">Welcome, point your view at any machine to begin.</p>
+            <p>Voice ready. Say "Start" to activate scanner.</p>
+            <p class="barista-version">v0.1.0 Open Source</p>
+          </section>
+          <section class="barista-hero">
+            <h1>BandungPanasOS</h1>
+            <p>Open AR Platform</p>
+          </section>
+        </div>
+        <div id="stereoUiOverlay" class="stereo-ui-overlay" hidden>
+          <div id="stereoUiLeft" class="stereo-eye left"></div>
+          <div id="stereoUiRight" class="stereo-eye right"></div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="hint">Click the tabs above to navigate between states.</footer>
+    <script src="/app.js" defer></script>
+  </body>
+</html>
