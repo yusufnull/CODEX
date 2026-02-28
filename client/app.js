@@ -33,10 +33,20 @@ const state = {
     outCanvas: null,
     outCtx: null,
     outImageData: null
+  },
+  scan: {
+    active: false,
+    tipIndex: 0,
+    tipTimer: null
   }
 };
 
-const KNOWN_COMMANDS = new Set(["left", "right", "back", "exit", "click", "barista", "eduar", "67", "change", "change mode"]);
+const KNOWN_COMMANDS = new Set(["left", "right", "back", "exit", "click", "barista", "eduar", "67", "scan", "change", "change mode"]);
+const SCAN_TIPS = [
+  "Slowly rotate 360° so the camera can map the machine.",
+  "Find and face the machine — do a slow 360°.",
+  "Stand ~1–2 meters from the machine for best results."
+];
 
 const els = {
   createSessionBtn: document.getElementById("createSessionBtn"),
@@ -137,6 +147,45 @@ function syncStereoUiShift() {
   }
   const shiftPx = Math.round(state.stereo.separationPx * 0.6);
   els.stereoUiOverlay.style.setProperty("--ui-shift-px", `${shiftPx}px`);
+}
+
+function updateScanTip() {
+  const text = SCAN_TIPS[state.scan.tipIndex] || SCAN_TIPS[0];
+  document.querySelectorAll(".scan-tip-text").forEach((node) => {
+    node.textContent = text;
+  });
+}
+
+function applyScanOverlayState() {
+  document.querySelectorAll(".scan-overlay").forEach((node) => {
+    node.hidden = !state.scan.active;
+  });
+  updateScanTip();
+}
+
+function setScanMode(enabled) {
+  const next = Boolean(enabled);
+  const changed = state.scan.active !== next;
+  state.scan.active = next;
+  if (!state.scan.active) {
+    if (state.scan.tipTimer) {
+      clearInterval(state.scan.tipTimer);
+      state.scan.tipTimer = null;
+    }
+    state.scan.tipIndex = 0;
+    applyScanOverlayState();
+    return;
+  }
+  if (changed) {
+    state.scan.tipIndex = 0;
+  }
+  if (!state.scan.tipTimer) {
+    state.scan.tipTimer = setInterval(() => {
+      state.scan.tipIndex = (state.scan.tipIndex + 1) % SCAN_TIPS.length;
+      updateScanTip();
+    }, 4200);
+  }
+  applyScanOverlayState();
 }
 
 function stripIds(root) {
@@ -308,6 +357,7 @@ function setStereoEnabled(enabled) {
   if (state.stereo.active) {
     resizeStereoCanvas();
     buildStereoUiMirrors();
+    setScanMode(state.scan.active);
     if (els.stereoCanvas) {
       els.stereoCanvas.hidden = false;
     }
@@ -383,6 +433,9 @@ function resolveVoiceCommand(rawText) {
   }
   if (normalized.includes("67") || normalized.includes("sixty seven")) {
     return "67";
+  }
+  if (normalized.includes("scan") || normalized.includes("start scanner")) {
+    return "scan";
   }
   if (normalized.includes("change mode")) {
     return "change";
@@ -694,6 +747,10 @@ function triggerVoiceCommand(command) {
   }
   if (command === "67") {
     launchApp("67");
+    return;
+  }
+  if (command === "scan") {
+    setScanMode(true);
     return;
   }
   if (command === "change") {
@@ -1058,6 +1115,7 @@ function closeBaristaApp() {
     });
   }
   els.appFullscreen.hidden = true;
+  setScanMode(false);
   setStereoEnabled(false);
   stopBaristaCamera();
 }
@@ -1202,6 +1260,7 @@ window.addEventListener("beforeunload", () => {
     clearInterval(state.voice.retryTimer);
     state.voice.retryTimer = null;
   }
+  setScanMode(false);
   setStereoEnabled(false);
   stopVoiceCommands().catch(() => {
     // Ignore cleanup errors during unload.

@@ -75,7 +75,7 @@
               </div>
             </div>
           </div>
-          <button class="voice-pill" type="button">Say: Barista, EduAR, 67, left, right, change</button>
+          <button class="voice-pill" type="button">Say: Barista, EduAR, 67, scan, left, right, change</button>
         </div>
       </section>
 
@@ -131,7 +131,7 @@
           <div class="row">
             <button id="voiceToggleBtn">Reconnect voice</button>
           </div>
-          <p class="meta">Commands: left, right, back, exit, click, barista, eduar, 67, change</p>
+          <p class="meta">Commands: left, right, back, exit, click, barista, eduar, 67, scan, change</p>
           <p class="meta" id="voicePartialText">Partial: -</p>
           <p class="meta" id="voiceCommandText">Last command: none</p>
           <p class="meta" id="voiceEventType">Last event: -</p>
@@ -186,8 +186,19 @@
           <section class="barista-landing-panel">
             <h2>BANDUNGPANAS OS</h2>
             <p class="barista-strong">Welcome, point your view at any machine to begin.</p>
-            <p>Voice ready. Say "Start" to activate scanner.</p>
+            <p>Voice ready. Say "scan" to activate scanner.</p>
             <p class="barista-version">v0.1.0 Open Source</p>
+          </section>
+          <section class="scan-overlay" hidden>
+            <div class="scan-pill">🔎 Scanning environment...</div>
+            <div class="scan-frame">
+              <span class="corner tl"></span>
+              <span class="corner tr"></span>
+              <span class="corner bl"></span>
+              <span class="corner br"></span>
+              <div class="scan-sweep"></div>
+            </div>
+            <p class="scan-tip-text">Slowly rotate 360° so the camera can map the machine.</p>
           </section>
         </div>
         <div id="stereoUiOverlay" class="stereo-ui-overlay" hidden>
