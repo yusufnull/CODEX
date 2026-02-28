@@ -1,5 +1,18 @@
 # AR Hackathon Demo (Single User, No Redis)
 
+<iframe
+  width="315"
+  height="560"
+  src="https://www.youtube.com/embed/arckWPr36Ws"
+  title="AR Hackathon Demo"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowfullscreen
+></iframe>
+
+- It looks best with a stereoscopic headset. Approach us to try it out :)
+
 This starter implements a minimal architecture for phone/tablet pairing with:
 
 - In-memory session state (single backend process)
