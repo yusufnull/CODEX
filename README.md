@@ -1,15 +1,6 @@
 # AR Hackathon Demo (Single User, No Redis)
 
-<iframe
-  width="315"
-  height="560"
-  src="https://www.youtube.com/embed/arckWPr36Ws"
-  title="AR Hackathon Demo"
-  frameborder="0"
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-  referrerpolicy="strict-origin-when-cross-origin"
-  allowfullscreen
-></iframe>
+[![AR Hackathon Demo](https://img.youtube.com/vi/arckWPr36Ws/0.jpg)](https://www.youtube.com/watch?v=arckWPr36Ws)
 
 - It looks best with a stereoscopic headset. Approach us to try it out :)
 
